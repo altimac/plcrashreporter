@@ -871,7 +871,9 @@ cleanup:
  */
 - (id) initWithBundle: (NSBundle *) bundle configuration: (PLCrashReporterConfig *) configuration {
     NSString *bundleIdentifier = [bundle bundleIdentifier];
-    NSString *bundleVersion = [[bundle infoDictionary] objectForKey: (NSString *) kCFBundleVersionKey];
+    
+    NSString *shortVersionString = [[bundle infoDictionary] objectForKey: @"CFBundleShortVersionString"]; // version number aka 1.1.2
+    NSString *bundleVersion = [[bundle infoDictionary] objectForKey: (NSString *) kCFBundleVersionKey]; // build number aka 1405
     
     /* Verify that the identifier is available */
     if (bundleIdentifier == nil) {
@@ -890,6 +892,12 @@ cleanup:
     if (bundleVersion == nil) {
         NSDEBUG(@"Warning -- bundle version unavailable");
         bundleVersion = @"";
+    }
+    
+    // AH Fix: What apple does is concatenate like this : <CFBundleShortVersionString> (<kCFBundleVersion>)
+    if([shortVersionString length] > 0)
+    {
+        bundleVersion = [shortVersionString stringByAppendingFormat:@" (%@)",bundleVersion];
     }
     
     return [self initWithApplicationIdentifier: bundleIdentifier appVersion: bundleVersion configuration: configuration];
